@@ -297,9 +297,10 @@ bool validateAuthorizationStatus(UnityNotificationManager* manager)
     if (data->threadIdentifier != NULL)
         content.threadIdentifier = [NSString stringWithUTF8String: data->threadIdentifier];
 
-    UNNotificationSound* sound = [self soundForNotification: data];
-    if (sound != nil)
-        content.sound = sound;
+    // XXX: 강제로 사운드를 재생하지 않음.
+    // UNNotificationSound* sound = [self soundForNotification: data];
+    // if (sound != nil)
+    //    content.sound = sound;
 
     content.attachments = (__bridge_transfer NSArray<UNNotificationAttachment*>*)data->attachments;
     data->attachments = NULL;
