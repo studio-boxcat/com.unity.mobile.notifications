@@ -2,6 +2,41 @@
 
 All notable changes to this package will be documented in this file.
 
+## [2.2.2] - 2023-09-07
+
+### Changes & Improvements:
+- [Android] - Reschedule after reboot will send all notifications that expired less than 10 minutes ago.
+- [iOS] - Remote notifications now support showInForeground key (allows to show notification while app is the foreground).
+
+### Fixes:
+- [Android] - [issue 271](https://github.com/Unity-Technologies/com.unity.mobile.notifications/issues/271) Fix possible ANR when sending/rescheduling after reboot.
+- [iOS] - Remote notification presentation options work regardless of when authorization is performed.
+- [iOS] - Remote notifications have presentation independent of whether callback is registered or not.
+
+## [2.2.1] - 2023-07-17
+
+### Fixes:
+
+- Changing settings will make settings file editable if read-only by version control.
+- Documentation updates.
+
+## [2.2.0] - 2023-04-06
+
+### Changes & Improvements:
+- [Android] - Added support for notification channel groups.
+- [Android] - Added support for BigPicture style.
+- [Android] - Icons now support local files and URIs.
+- [Android] - Added API to check if UI with permission rationale for notifications should be shown before requesting permission.
+- [Android] - Added APIs to request exact scheduling and bypasssing battery optimizations.
+- [Android] - Minification seetings now managed automatically by package.
+- [Android] - AndroidNotificationCenter.UserPermissionToPost now will also report if notifications are blocked in Settings (Android 7+).
+- [iOS] - Added support for notification action icons (requires iOS 15).
+- [iOS] - Added property to set interruption level (requires iOS 15).
+- [iOS] - Added property to set relevance score (requires iOS 15).
+
+### Fixes:
+- [Android] - Fix updating scheduled notification not updating if app is not killed.
+
 ## [2.1.1] - 2023-01-04
 
 ### Fixes:
