@@ -58,15 +58,7 @@ NotificationSettingsData UNNotificationSettingsToNotificationSettingsData(UNNoti
     settingsData.notificationCenterSetting = (int)settings.notificationCenterSetting;
     settingsData.soundSetting = (int)settings.soundSetting;
     settingsData.alertStyle = (int)settings.alertStyle;
-
-    if (@available(iOS 11.0, *))
-    {
-        settingsData.showPreviewsSetting = (int)settings.showPreviewsSetting;
-    }
-    else
-    {
-        settingsData.showPreviewsSetting = 2;
-    }
+    settingsData.showPreviewsSetting = (int)settings.showPreviewsSetting;
     return settingsData;
 }
 
@@ -243,6 +235,12 @@ void freeiOSNotificationData(iOSNotificationData* notificationData)
         NSDictionary* userInfo = (__bridge_transfer NSDictionary*)notificationData->userInfo;
         userInfo = nil;
     }
+
+    if (notificationData->attachments != NULL)
+    {
+        NSArray* attachments = (__bridge_transfer NSArray*)notificationData->attachments;
+        attachments = nil;
+    }
 }
 
 void* _AddItemToNSDictionary(void* dict, const char* key, const char* value)
@@ -306,7 +304,7 @@ void _ReadNSDictionary(void* csDict, void* nsDict, void (*callback)(void* csDcit
 
 void _ReadAttachmentsNSArray(void* csList, void* nsArray, void (*callback)(void*, const char*, const char*))
 {
-    NSArray<UNNotificationAttachment*>* attachments = (__bridge_transfer NSArray<UNNotificationAttachment*>*)nsArray;
+    NSArray<UNNotificationAttachment*>* attachments = (__bridge NSArray<UNNotificationAttachment*>*)nsArray;
     [attachments enumerateObjectsUsingBlock:^(UNNotificationAttachment * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString* idr = obj.identifier;
         NSString* url = obj.URL.absoluteString;

@@ -2,6 +2,33 @@
 
 All notable changes to this package will be documented in this file.
 
+## [2.3.2] - 2024-02-09
+
+### Fixes:
+- [Android] - Remove excessive permissions and metadata from default manifest (auto-add them based on settings).
+- [Android] - Fixed notification status reporting after dismissing notification and re-launching the app.
+- [iOS] - Fixed a possible crash when sending push notifications with attachment (like image).
+
+## [2.3.1] - 2023-12-11
+
+### Fixes:
+- [Android] - Mark Android library to be compatible only with Android.
+- [iOS] - Calendar trigger will use local or UTC time depending on which one is set on trigger.
+- Various documentation fixes.
+
+## [2.3.0] - 2023-10-09
+
+### Changes & Improvements:
+
+- Added unified APIs for basic notifications that work on both platforms in the `Unity.Notifications` namespace.
+- Sample project modified to use unified APIs.
+- [Android] - Package now placed to Gradle project as a separate module (.androidlib).
+- [iOS] - Added APIs for checking and unregistering for push notifications.
+- [iOS] - Added new presentation options, supported since iOS 14 (list and banner).
+
+### Fixes:
+- [Android] - [issue 290](https://github.com/Unity-Technologies/com.unity.mobile.notifications/issues/290) Fix large icon not displayed when privided as file path.
+
 ## [2.2.2] - 2023-09-07
 
 ### Changes & Improvements:
