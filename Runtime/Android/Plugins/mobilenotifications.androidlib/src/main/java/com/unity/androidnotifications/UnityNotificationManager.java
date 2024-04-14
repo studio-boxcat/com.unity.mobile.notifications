@@ -217,6 +217,11 @@ public class UnityNotificationManager extends BroadcastReceiver {
             channel.setLockscreenVisibility(lockscreenVisibility);
             channel.setGroup(group);
 
+            // XXX: Disable sounds for the notification channel
+            // For above Android O, we can control the sound by the NotificationChannel.
+            // Below Android O, we should disable the sound in the Notification.Builder.
+            channel.setSound(null, null);
+
             getNotificationManager().createNotificationChannel(channel);
         } else {
             SharedPreferences prefs = mContext.getSharedPreferences(NOTIFICATION_CHANNELS_SHARED_PREFS, Context.MODE_PRIVATE);
@@ -802,6 +807,10 @@ public class UnityNotificationManager extends BroadcastReceiver {
     }
 
     private void finalizeNotificationForDisplay(Notification.Builder notificationBuilder) {
+        // XXX: Disable sounds for the notification
+        // This method was deprecated in API level 26.
+        notificationBuilder.setSound(null);
+
         String icon = notificationBuilder.getExtras().getString(KEY_SMALL_ICON);
         Object ico = getIconForUri(icon);
         if (ico != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
