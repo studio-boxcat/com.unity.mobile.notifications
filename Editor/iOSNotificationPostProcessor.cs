@@ -93,14 +93,8 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         if (needsToWriteChanges)
             File.WriteAllText(pbxProjectPath, pbxProject.WriteToString());
 
-        var entitlementsFileName = pbxProject.GetBuildPropertyForAnyConfig(mainTarget, "CODE_SIGN_ENTITLEMENTS");
-        if (entitlementsFileName == null)
-        {
-            var bundleIdentifier = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.iOS);
-            entitlementsFileName = string.Format("{0}.entitlements", bundleIdentifier.Substring(bundleIdentifier.LastIndexOf(".") + 1));
-        }
-
         // Update the entitlements file.
+        const string entitlementsFileName = "ios.entitlements";
         if (addPushNotificationCapability)
         {
             var capManager = new ProjectCapabilityManager(pbxProjectPath, entitlementsFileName, "Unity-iPhone");
