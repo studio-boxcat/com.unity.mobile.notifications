@@ -1,3 +1,4 @@
+#if UNITY_IOS || UNITY_EDITOR
 using System;
 using UnityEngine;
 
@@ -275,3 +276,4 @@ namespace Unity.Notifications.iOS
         }
     }
 }
+#endif

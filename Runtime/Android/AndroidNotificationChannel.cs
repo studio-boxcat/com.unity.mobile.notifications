@@ -1,3 +1,4 @@
+#if UNITY_ANDROID || UNITY_EDITOR
 using System;
 
 namespace Unity.Notifications.Android
@@ -181,3 +182,4 @@ namespace Unity.Notifications.Android
         public string Description { get; set; }
     }
 }
+#endif

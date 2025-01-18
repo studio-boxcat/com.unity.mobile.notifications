@@ -1,3 +1,4 @@
+#if UNITY_ANDROID || UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -74,3 +75,4 @@ namespace Unity.Notifications.Android
         }
     }
 }
+#endif

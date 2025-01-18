@@ -1,3 +1,4 @@
+#if UNITY_IOS || UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -495,3 +496,4 @@ namespace Unity.Notifications.iOS
     }
 }
 #pragma warning restore 162
+#endif

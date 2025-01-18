@@ -1,3 +1,4 @@
+#if UNITY_IOS || UNITY_EDITOR
 using System.Collections.Generic;
 
 namespace Unity.Notifications.iOS
@@ -253,3 +254,4 @@ namespace Unity.Notifications.iOS
         }
     }
 }
+#endif

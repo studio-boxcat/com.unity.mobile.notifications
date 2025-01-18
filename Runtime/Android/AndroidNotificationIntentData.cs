@@ -1,3 +1,4 @@
+#if UNITY_ANDROID || UNITY_EDITOR
 using UnityEngine;
 
 namespace Unity.Notifications.Android
@@ -41,3 +42,4 @@ namespace Unity.Notifications.Android
         }
     }
 }
+#endif

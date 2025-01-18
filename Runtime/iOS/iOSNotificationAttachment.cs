@@ -1,3 +1,4 @@
+#if UNITY_IOS || UNITY_EDITOR
 namespace Unity.Notifications.iOS
 {
     /// <summary>
@@ -23,3 +24,4 @@ namespace Unity.Notifications.iOS
         public string Url { get; set; }
     }
 }
+#endif
