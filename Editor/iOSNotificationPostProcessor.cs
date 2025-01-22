@@ -37,22 +37,13 @@ public class iOSNotificationPostProcessor : MonoBehaviour
 
         var needLocationFramework = (bool)settings.Find(i => i.Key == NotificationSettings.iOSSettings.USE_LOCATION_TRIGGER).Value;
         var addPushNotificationCapability = (bool)settings.Find(i => i.Key == NotificationSettings.iOSSettings.ADD_PUSH_CAPABILITY).Value;
-        var addTimeSensitiveEntitlement = (bool)settings.Find(i => i.Key == NotificationSettings.iOSSettings.ADD_TIME_SENSITIVE_ENTITLEMENT).Value;
 
-        var useReleaseAPSEnv = false;
-        if (addPushNotificationCapability)
-        {
-            var useReleaseAPSEnvSetting = settings.Find(i => i.Key == NotificationSettings.iOSSettings.USE_APS_RELEASE);
-            if (useReleaseAPSEnvSetting != null)
-                useReleaseAPSEnv = (bool)useReleaseAPSEnvSetting.Value;
-        }
-
-        PatchPBXProject(path, needLocationFramework, addPushNotificationCapability, useReleaseAPSEnv, addTimeSensitiveEntitlement);
+        PatchPBXProject(path, needLocationFramework, addPushNotificationCapability);
         PatchPlist(path, settings, addPushNotificationCapability);
         PatchPreprocessor(path, needLocationFramework, addPushNotificationCapability);
     }
 
-    private static void PatchPBXProject(string path, bool needLocationFramework, bool addPushNotificationCapability, bool useReleaseAPSEnv, bool addTimeSensitiveEntitlement)
+    private static void PatchPBXProject(string path, bool needLocationFramework, bool addPushNotificationCapability)
     {
         var pbxProjectPath = PBXProject.GetPBXProjectPath(path);
 
@@ -61,7 +52,6 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         var pbxProject = new PBXProject();
         pbxProject.ReadFromString(File.ReadAllText(pbxProjectPath));
 
-        string mainTarget;
         string unityFrameworkTarget;
 
         var unityMainTargetGuidMethod = pbxProject.GetType().GetMethod("GetUnityMainTargetGuid");
@@ -69,13 +59,11 @@ public class iOSNotificationPostProcessor : MonoBehaviour
 
         if (unityMainTargetGuidMethod != null && unityFrameworkTargetGuidMethod != null)
         {
-            mainTarget = (string)unityMainTargetGuidMethod.Invoke(pbxProject, null);
             unityFrameworkTarget = (string)unityFrameworkTargetGuidMethod.Invoke(pbxProject, null);
         }
         else
         {
-            mainTarget = pbxProject.TargetGuidByName("Unity-iPhone");
-            unityFrameworkTarget = mainTarget;
+            unityFrameworkTarget = pbxProject.TargetGuidByName("Unity-iPhone");
         }
 
         // Add necessary frameworks.
@@ -98,27 +86,8 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         if (addPushNotificationCapability)
         {
             var capManager = new ProjectCapabilityManager(pbxProjectPath, entitlementsFileName, "Unity-iPhone");
-            capManager.AddPushNotifications(!useReleaseAPSEnv);
-            capManager.WriteToFile();
-        }
-
-        if (addTimeSensitiveEntitlement)
-        {
-            var entitlementsFile = new PlistDocument();
-            var entitlementsFilePath = Path.Combine(path, entitlementsFileName);
-            if (File.Exists(entitlementsFilePath))
-                entitlementsFile.ReadFromFile(entitlementsFilePath);
-            var entitlement = entitlementsFile.root["com.apple.developer.usernotifications.time-sensitive"] as PlistElementBoolean;
-            if (entitlement == null || entitlement.AsBoolean() == false)
-            {
-                entitlementsFile.root["com.apple.developer.usernotifications.time-sensitive"] = new PlistElementBoolean(true);
-                entitlementsFile.WriteToFile(entitlementsFilePath);
-            }
-            if (pbxProject.GetBuildPropertyForAnyConfig(mainTarget, "CODE_SIGN_ENTITLEMENTS") == null)
-            {
-                pbxProject.AddBuildProperty(mainTarget, "CODE_SIGN_ENTITLEMENTS", entitlementsFileName);
-                pbxProject.WriteToFile(pbxProjectPath);
-            }
+            capManager.AddPushNotifications(development: false);
+            capManager.WriteToFile(); // will write both entitlements and pbxproj (for frameworks)
         }
     }
 

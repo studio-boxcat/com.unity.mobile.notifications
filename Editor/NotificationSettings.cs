@@ -172,9 +172,7 @@ namespace Unity.Notifications
             internal static readonly string ADD_PUSH_CAPABILITY = "UnityAddRemoteNotificationCapability";
             internal static readonly string REQUEST_PUSH_AUTH_ON_LAUNCH = "UnityNotificationRequestAuthorizationForRemoteNotificationsOnAppLaunch";
             internal static readonly string PUSH_NOTIFICATION_PRESENTATION = "UnityRemoteNotificationForegroundPresentationOptions";
-            internal static readonly string USE_APS_RELEASE = "UnityUseAPSReleaseEnvironment";
             internal static readonly string USE_LOCATION_TRIGGER = "UnityUseLocationNotificationTrigger";
-            internal static readonly string ADD_TIME_SENSITIVE_ENTITLEMENT = "UnityAddTimeSensitiveEntitlement";
 
             /// <summary>
             /// It's recommended to make the authorization request during the app's launch cycle. If this is enabled the user will be shown the authorization pop-up immediately when the app launches. If it’s unchecked you’ll need to manually create an AuthorizationRequest before your app can send or receive notifications.
@@ -252,21 +250,6 @@ namespace Unity.Notifications
             }
 
             /// <summary>
-            /// Enable this when signing the app with a production certificate.
-            /// </summary>
-            public static bool UseAPSReleaseEnvironment
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, USE_APS_RELEASE);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, USE_APS_RELEASE, value);
-                }
-            }
-
-            /// <summary>
             /// If you intend to use the iOSNotificationLocationTrigger in your notifications you must include the CoreLocation framework in your project.
             /// </summary>
             public static bool UseLocationNotificationTrigger
@@ -278,21 +261,6 @@ namespace Unity.Notifications
                 set
                 {
                     SetSettingValue<bool>(BuildTargetGroup.iOS, USE_LOCATION_TRIGGER, value);
-                }
-            }
-
-            /// <summary>
-            /// Add entitlement to enable notifications with time-sensitive interruption level.
-            /// </summary>
-            public static bool AddTimeSensitiveEntitlement
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, ADD_TIME_SENSITIVE_ENTITLEMENT);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, ADD_TIME_SENSITIVE_ENTITLEMENT, value);
                 }
             }
         }
