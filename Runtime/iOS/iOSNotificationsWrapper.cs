@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using AOT;
-using UnityEngine;
 
 #pragma warning disable 162
 
@@ -16,7 +15,7 @@ namespace Unity.Notifications.iOS
         internal List<iOSNotificationAttachment> attachments;
     }
 
-    internal class iOSNotificationsWrapper : MonoBehaviour
+    internal static class iOSNotificationsWrapper
     {
 #if DEVELOPMENT_BUILD
         [DllImport("__Internal")]
