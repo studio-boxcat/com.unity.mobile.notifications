@@ -361,42 +361,6 @@ bool validateAuthorizationStatus(UnityNotificationManager* manager)
     }];
 }
 
-- (UNNotificationSound*)soundForNotification:(const iOSNotificationData*)data
-{
-    NSString* soundName = nil;
-    if (data->soundName != NULL)
-        soundName = [NSString stringWithUTF8String: data->soundName];
-
-    switch (data->soundType)
-    {
-        case kSoundTypeNone:
-            return nil;
-        case kSoundTypeCritical:
-            if (soundName != nil)
-            {
-                if (data->soundVolume < 0)
-                    return [UNNotificationSound criticalSoundNamed: soundName];
-                return [UNNotificationSound criticalSoundNamed: soundName withAudioVolume: data->soundVolume];
-            }
-            if (data->soundVolume >= 0)
-                return [UNNotificationSound defaultCriticalSoundWithAudioVolume: data->soundVolume];
-            return UNNotificationSound.defaultCriticalSound;
-        case kSoundTypeRingtone:
-            if (@available(iOS 15.2, *))
-            {
-                if (soundName != nil)
-                    return [UNNotificationSound ringtoneSoundNamed: soundName];
-                return UNNotificationSound.defaultRingtoneSound;
-            }
-        // continue to default
-        case kSoundTypeDefault:
-        default:
-            if (soundName != nil)
-                return [UNNotificationSound soundNamed: soundName];
-            return UNNotificationSound.defaultSound;
-    }
-}
-
 - (UNNotificationInterruptionLevel)unityInterruptionLevelToIos:(int)level
     API_AVAILABLE(ios(15.0))
 {
