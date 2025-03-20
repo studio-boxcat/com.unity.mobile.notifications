@@ -1,6 +1,7 @@
 using Unity.Notifications.iOS;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Unity.Notifications
 {
@@ -14,14 +15,8 @@ namespace Unity.Notifications
             var manager = NotificationSettingsManager.Initialize();
 
             NotificationSetting setting = null;
-            if (target == BuildTargetGroup.Android)
-            {
-                setting = manager.AndroidNotificationSettingsFlat.Find(i => i.Key == key);
-            }
-            else if (target == BuildTargetGroup.iOS)
-            {
-                setting = manager.iOSNotificationSettingsFlat.Find(i => i.Key == key);
-            }
+            Assert.AreEqual(target, BuildTargetGroup.Android, "Only Android platform is supported");
+            setting = manager.AndroidNotificationSettingsFlat.Find(i => i.Key == key);
 
             return setting;
         }
@@ -34,7 +29,7 @@ namespace Unity.Notifications
             if (setting != null)
             {
                 setting.Value = value;
-                manager.SaveSetting(setting, target);
+                manager.SaveSetting(setting);
             }
         }
 
@@ -51,7 +46,6 @@ namespace Unity.Notifications
         {
             internal static readonly string RESCHEDULE_ON_RESTART = "UnityNotificationAndroidRescheduleOnDeviceRestart";
             internal static readonly string EXACT_ALARM = "UnityNotificationAndroidScheduleExactAlarms";
-            internal static readonly string USE_CUSTOM_ACTIVITY = "UnityNotificationAndroidUseCustomActivity";
             internal static readonly string CUSTOM_ACTIVITY_CLASS = "UnityNotificationAndroidCustomActivityString";
 
             /// <summary>
@@ -66,21 +60,6 @@ namespace Unity.Notifications
                 set
                 {
                     SetSettingValue<bool>(BuildTargetGroup.Android, RESCHEDULE_ON_RESTART, value);
-                }
-            }
-
-            /// <summary>
-            /// Enable this if you want to override the activity which will opened when the user click on the notification. By default activity assigned to `com.unity3d.player.UnityPlayer.currentActivity` will be used.
-            /// </summary>
-            public static bool UseCustomActivity
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.Android, USE_CUSTOM_ACTIVITY);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.Android, USE_CUSTOM_ACTIVITY, value);
                 }
             }
 
@@ -160,109 +139,6 @@ namespace Unity.Notifications
             }
 
 
-        }
-
-        /// <summary>
-        /// Class used to access iOS-specific notification settings.
-        /// </summary>
-        public static class iOSSettings
-        {
-            internal static readonly string REQUEST_AUTH_ON_LAUNCH = "UnityNotificationRequestAuthorizationOnAppLaunch";
-            internal static readonly string DEFAULT_AUTH_OPTS = "UnityNotificationDefaultAuthorizationOptions";
-            internal static readonly string ADD_PUSH_CAPABILITY = "UnityAddRemoteNotificationCapability";
-            internal static readonly string REQUEST_PUSH_AUTH_ON_LAUNCH = "UnityNotificationRequestAuthorizationForRemoteNotificationsOnAppLaunch";
-            internal static readonly string PUSH_NOTIFICATION_PRESENTATION = "UnityRemoteNotificationForegroundPresentationOptions";
-            internal static readonly string USE_LOCATION_TRIGGER = "UnityUseLocationNotificationTrigger";
-
-            /// <summary>
-            /// It's recommended to make the authorization request during the app's launch cycle. If this is enabled the user will be shown the authorization pop-up immediately when the app launches. If it’s unchecked you’ll need to manually create an AuthorizationRequest before your app can send or receive notifications.
-            /// </summary>
-            public static bool RequestAuthorizationOnAppLaunch
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, REQUEST_AUTH_ON_LAUNCH);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, REQUEST_AUTH_ON_LAUNCH, value);
-                }
-            }
-
-            /// <summary>
-            /// Configure the notification interaction types your app will include in the authorisation request if RequestAuthorizationOnAppLaunch is enabled. Alternatively you can specify them when creating a `AuthorizationRequest` from a script.
-            /// </summary>
-            public static AuthorizationOption DefaultAuthorizationOptions
-            {
-                get
-                {
-                    return GetSettingValue<AuthorizationOption>(BuildTargetGroup.iOS, DEFAULT_AUTH_OPTS);
-                }
-                set
-                {
-                    SetSettingValue<AuthorizationOption>(BuildTargetGroup.iOS, DEFAULT_AUTH_OPTS, value);
-                }
-            }
-
-            /// <summary>
-            /// Enable this to add the push notification capability to you Xcode project.
-            /// </summary>
-            public static bool AddRemoteNotificationCapability
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, ADD_PUSH_CAPABILITY);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, ADD_PUSH_CAPABILITY, value);
-                }
-            }
-
-            /// <summary>
-            /// If this is enabled the app will automatically register your app with APNs after the launch which would enable it to receive remote notifications. You’ll have to manually create a AuthorizationRequest to get the device token.
-            /// </summary>
-            public static bool NotificationRequestAuthorizationForRemoteNotificationsOnAppLaunch
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, REQUEST_PUSH_AUTH_ON_LAUNCH);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, REQUEST_PUSH_AUTH_ON_LAUNCH, value);
-                }
-            }
-
-            /// <summary>
-            /// The default presentation options for received remote notifications. In order for the specified presentation options to be used your app must had received the authorization to use them (the user might change it at any time).
-            /// </summary>
-            public static PresentationOption RemoteNotificationForegroundPresentationOptions
-            {
-                get
-                {
-                    return GetSettingValue<PresentationOption>(BuildTargetGroup.iOS, PUSH_NOTIFICATION_PRESENTATION);
-                }
-                set
-                {
-                    SetSettingValue<PresentationOption>(BuildTargetGroup.iOS, PUSH_NOTIFICATION_PRESENTATION, value);
-                }
-            }
-
-            /// <summary>
-            /// If you intend to use the iOSNotificationLocationTrigger in your notifications you must include the CoreLocation framework in your project.
-            /// </summary>
-            public static bool UseLocationNotificationTrigger
-            {
-                get
-                {
-                    return GetSettingValue<bool>(BuildTargetGroup.iOS, USE_LOCATION_TRIGGER);
-                }
-                set
-                {
-                    SetSettingValue<bool>(BuildTargetGroup.iOS, USE_LOCATION_TRIGGER, value);
-                }
-            }
         }
     }
 }

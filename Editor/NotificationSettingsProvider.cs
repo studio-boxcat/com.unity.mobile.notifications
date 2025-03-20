@@ -3,8 +3,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
-using Unity.Notifications.iOS;
-using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
 namespace Unity.Notifications
@@ -21,7 +19,6 @@ namespace Unity.Notifications
         private readonly GUIContent k_IdentifierLabelText = new GUIContent("Identifier");
         private readonly GUIContent k_TypeLabelText = new GUIContent("Type");
 
-        private readonly string[] k_ToolbarStrings = { "Android", "iOS" };
         private const string k_InfoStringAndroid =
             "Only icons added to this list or manually added to the 'res/drawable' folder can be used for notifications.\n" +
             "Note, that not all devices support colored icons.\n\n" +
@@ -233,26 +230,17 @@ namespace Unity.Notifications
 
             var totalRect = new Rect(k_Padding, 0f, width - k_Padding, Screen.height);
 
-            // Draw the toolbar for Android/iOS.
-            var toolBarRect = new Rect(totalRect.x, totalRect.y, totalRect.width, k_ToolbarHeight);
-            var toolbarIndex = GUI.Toolbar(toolBarRect, m_SettingsManager.ToolbarIndex, k_ToolbarStrings);
-            if (toolbarIndex != m_SettingsManager.ToolbarIndex)
-            {
-                m_SettingsManager.ToolbarIndex = toolbarIndex;
-                m_SettingsManager.SaveSettings();
-            }
-
+            // Draw the toolbar for Android.
             var notificationSettingsRect = new Rect(totalRect.x, k_ToolbarHeight + 2, totalRect.width, totalRect.height - k_ToolbarHeight - k_Padding);
 
             // Draw the notification settings.
-            int drawnSettingsCount = DrawNotificationSettings(notificationSettingsRect, m_SettingsManager.ToolbarIndex);
+            int drawnSettingsCount = DrawNotificationSettings(notificationSettingsRect);
             if (drawnSettingsCount <= 0)
                 return;
 
             float heightPlaceHolder = k_SlotSize;
 
             // Draw drawable resources list for Android.
-            if (m_SettingsManager.ToolbarIndex == 0)
             {
                 var iconListlabelRect = new Rect(notificationSettingsRect.x, notificationSettingsRect.y + 85, 180, k_LabelLineHeight);
                 GUI.Label(iconListlabelRect, "Notification Icons", EditorStyles.label);
@@ -279,25 +267,11 @@ namespace Unity.Notifications
             EditorGUILayout.GetControlRect(true, heightPlaceHolder, GUILayout.MinWidth(width));
         }
 
-        private int DrawNotificationSettings(Rect rect, int toolbarIndex)
+        private int DrawNotificationSettings(Rect rect)
         {
-            Assert.IsTrue(toolbarIndex == 0 || toolbarIndex == 1);
-
-            List<NotificationSetting> settings;
-            BuildTargetGroup buildTarget;
-            int labelWidthMultiplier;
-            if (toolbarIndex == 0)
-            {
-                settings = m_SettingsManager.AndroidNotificationSettings;
-                buildTarget = BuildTargetGroup.Android;
-                labelWidthMultiplier = 3;
-            }
-            else
-            {
-                settings = m_SettingsManager.iOSNotificationSettings;
-                buildTarget = BuildTargetGroup.iOS;
-                labelWidthMultiplier = 5;
-            }
+            var settings = m_SettingsManager.AndroidNotificationSettings;
+            var buildTarget = BuildTargetGroup.Android;
+            var labelWidthMultiplier = 3;
 
             if (settings == null)
                 return 0;
@@ -340,16 +314,6 @@ namespace Unity.Notifications
                 {
                     setting.Value = EditorGUILayout.TextField((string)setting.Value);
                 }
-                else if (setting.Value.GetType() == typeof(PresentationOption))
-                {
-                    setting.Value = (PresentationOption)EditorGUILayout.EnumFlagsField((iOSPresentationOption)setting.Value, dropdownStyle);
-                }
-                else if (setting.Value.GetType() == typeof(AuthorizationOption))
-                {
-                    setting.Value = (AuthorizationOption)EditorGUILayout.EnumFlagsField((iOSAuthorizationOption)setting.Value, dropdownStyle);
-                    if ((iOSAuthorizationOption)setting.Value == 0)
-                        setting.Value = (AuthorizationOption)(iOSAuthorizationOption.Badge | iOSAuthorizationOption.Sound | iOSAuthorizationOption.Alert);
-                }
                 else if (setting.Value.GetType() == typeof(AndroidExactSchedulingOption))
                 {
                     setting.Value = (AndroidExactSchedulingOption)EditorGUILayout.EnumFlagsField((AndroidExactSchedulingOption)setting.Value, dropdownStyle);
@@ -358,7 +322,7 @@ namespace Unity.Notifications
                     Debug.LogError("Unsupported setting type: " + setting.Value.GetType());
                 if (EditorGUI.EndChangeCheck())
                 {
-                    m_SettingsManager.SaveSetting(setting, buildTarget);
+                    m_SettingsManager.SaveSetting(setting);
                 }
 
                 EditorGUILayout.EndHorizontal();

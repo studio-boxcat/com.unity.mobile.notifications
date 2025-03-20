@@ -15,7 +15,6 @@
 {
     NSLock* _lock;
     UNAuthorizationStatus _remoteNotificationsRegistered;
-    NSInteger _remoteNotificationForegroundPresentationOptions;
     NSString* _deviceToken;
     NSPointerArray* _pendingRemoteAuthRequests;
 }
@@ -40,7 +39,6 @@
     _remoteNotificationsRegistered = UNAuthorizationStatusNotDetermined;
     _deviceToken = nil;
     _pendingRemoteAuthRequests = nil;
-    _remoteNotificationForegroundPresentationOptions = [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UnityRemoteNotificationForegroundPresentationOptions"] integerValue];
     return self;
 }
 
@@ -168,7 +166,7 @@
     showInForeground = [[notification.request.content.userInfo objectForKey: @"showInForeground"] boolValue];
     if ([notification.request.trigger isKindOfClass: [UNPushNotificationTrigger class]])
     {
-        presentationOptions = _remoteNotificationForegroundPresentationOptions;
+        presentationOptions = -1;
         if (self.onRemoteNotificationReceivedCallback != NULL)
         {
             if (!haveNotificationData)

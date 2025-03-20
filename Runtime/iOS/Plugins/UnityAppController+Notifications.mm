@@ -46,29 +46,6 @@
              [UnityNotificationManager sharedInstance].lastReceivedNotification = NULL;
          }];
 
-        [nc addObserverForName: kUnityWillFinishLaunchingWithOptions
-         object: nil
-         queue: [NSOperationQueue mainQueue]
-         usingBlock:^(NSNotification *notification) {
-             [UNUserNotificationCenter currentNotificationCenter].delegate = [UnityNotificationManager sharedInstance];
-
-             BOOL authorizeOnLaunch = [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UnityNotificationRequestAuthorizationOnAppLaunch"] boolValue];
-             BOOL supportsPushNotification = [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UnityAddRemoteNotificationCapability"] boolValue];
-             BOOL registerRemoteOnLaunch = supportsPushNotification == YES ?
-                 [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UnityNotificationRequestAuthorizationForRemoteNotificationsOnAppLaunch"] boolValue] : NO;
-
-             NSInteger defaultAuthorizationOptions = [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UnityNotificationDefaultAuthorizationOptions"] integerValue];
-
-             if (defaultAuthorizationOptions <= 0)
-                 defaultAuthorizationOptions = (UNAuthorizationOptionSound + UNAuthorizationOptionAlert + UNAuthorizationOptionBadge);
-
-             if (authorizeOnLaunch)
-             {
-                 UnityNotificationManager* manager = [UnityNotificationManager sharedInstance];
-                 [manager requestAuthorization: defaultAuthorizationOptions withRegisterRemote: registerRemoteOnLaunch forRequest: NULL];
-             }
-         }];
-
         [nc addObserverForName: kUnityDidRegisterForRemoteNotificationsWithDeviceToken
          object: nil
          queue: [NSOperationQueue mainQueue]
