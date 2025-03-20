@@ -17,22 +17,6 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         if (buildTarget != BuildTarget.iOS)
             return;
 
-        // Check if we have the minimal iOS version set.
-        bool hasMinOSVersion;
-        try
-        {
-            var requiredVersion = new Version(10, 0);
-            var currentVersion = new Version(PlayerSettings.iOS.targetOSVersionString);
-            hasMinOSVersion = currentVersion >= requiredVersion;
-        }
-        catch (Exception)
-        {
-            hasMinOSVersion = false;
-        }
-
-        if (!hasMinOSVersion)
-            Debug.Log("UserNotifications framework is only available on iOS 10.0+, please make sure that you set a correct `Target minimum iOS Version` in Player Settings.");
-
         var settings = NotificationSettingsManager.Initialize().iOSNotificationSettingsFlat;
 
         var needLocationFramework = (bool)settings.Find(i => i.Key == NotificationSettings.iOSSettings.USE_LOCATION_TRIGGER).Value;
@@ -52,19 +36,7 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         var pbxProject = new PBXProject();
         pbxProject.ReadFromString(File.ReadAllText(pbxProjectPath));
 
-        string unityFrameworkTarget;
-
-        var unityMainTargetGuidMethod = pbxProject.GetType().GetMethod("GetUnityMainTargetGuid");
-        var unityFrameworkTargetGuidMethod = pbxProject.GetType().GetMethod("GetUnityFrameworkTargetGuid");
-
-        if (unityMainTargetGuidMethod != null && unityFrameworkTargetGuidMethod != null)
-        {
-            unityFrameworkTarget = (string)unityFrameworkTargetGuidMethod.Invoke(pbxProject, null);
-        }
-        else
-        {
-            unityFrameworkTarget = pbxProject.TargetGuidByName("Unity-iPhone");
-        }
+        var unityFrameworkTarget = pbxProject.GetUnityFrameworkTargetGuid();
 
         // Add necessary frameworks.
         if (!pbxProject.ContainsFramework(unityFrameworkTarget, "UserNotifications.framework"))

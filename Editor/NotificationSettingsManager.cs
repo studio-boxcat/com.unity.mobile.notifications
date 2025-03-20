@@ -120,7 +120,6 @@ namespace Unity.Notifications
                     "Enable Push Notifications",
                     "Enable this to add the push notification capability to the Xcode project, also to retrieve the device token from an AuthorizationRequest.",
                     settingsManager.GetOrAddNotificationSettingValue(NotificationSettings.iOSSettings.ADD_PUSH_CAPABILITY, false, false),
-                    false,
                     new List<NotificationSetting>()
                     {
                         new NotificationSetting(
@@ -137,8 +136,7 @@ namespace Unity.Notifications
                 new NotificationSetting(NotificationSettings.iOSSettings.USE_LOCATION_TRIGGER,
                     "Include CoreLocation Framework",
                     "Include the CoreLocation framework to use the iOSNotificationLocationTrigger in your project.",
-                    settingsManager.GetOrAddNotificationSettingValue(NotificationSettings.iOSSettings.USE_LOCATION_TRIGGER, false, false),
-                    false),
+                    settingsManager.GetOrAddNotificationSettingValue(NotificationSettings.iOSSettings.USE_LOCATION_TRIGGER, false, false)),
             };
 
             // Create the settings for Android.
