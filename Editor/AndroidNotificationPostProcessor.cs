@@ -41,7 +41,6 @@ namespace Unity.Notifications
 
         internal struct ManifestSettings
         {
-            public string CustomActivity;
             public bool RescheduleOnRestart;
             public AndroidExactSchedulingOption ExactAlarm;
         }
@@ -58,7 +57,6 @@ namespace Unity.Notifications
             var settings = NotificationSettingsManager.Initialize().AndroidNotificationSettingsFlat;
             var manifestSettings = new ManifestSettings()
             {
-                CustomActivity = GetSetting<string>(settings, NotificationSettings.AndroidSettings.CUSTOM_ACTIVITY_CLASS),
                 RescheduleOnRestart = GetSetting<bool>(settings, NotificationSettings.AndroidSettings.RESCHEDULE_ON_RESTART),
                 ExactAlarm = GetSetting<AndroidExactSchedulingOption>(settings, NotificationSettings.AndroidSettings.EXACT_ALARM),
             };
@@ -70,9 +68,6 @@ namespace Unity.Notifications
 
         internal static void InjectAndroidManifest(string manifestPath, XmlDocument manifestDoc, ManifestSettings settings)
         {
-            if (!string.IsNullOrEmpty(settings.CustomActivity))
-                AppendAndroidMetadataField(manifestPath, manifestDoc, "custom_notification_android_activity", settings.CustomActivity);
-
             if (settings.RescheduleOnRestart)
             {
                 AppendAndroidMetadataField(manifestPath, manifestDoc, "reschedule_notifications_on_restart", "true");

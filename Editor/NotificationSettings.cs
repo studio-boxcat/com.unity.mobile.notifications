@@ -46,7 +46,6 @@ namespace Unity.Notifications
         {
             internal static readonly string RESCHEDULE_ON_RESTART = "UnityNotificationAndroidRescheduleOnDeviceRestart";
             internal static readonly string EXACT_ALARM = "UnityNotificationAndroidScheduleExactAlarms";
-            internal static readonly string CUSTOM_ACTIVITY_CLASS = "UnityNotificationAndroidCustomActivityString";
 
             /// <summary>
             /// By default AndroidSettings removes all scheduled notifications when the device is restarted. Enable this to automatically reschedule all non expired notifications when the device is turned back on.
@@ -60,21 +59,6 @@ namespace Unity.Notifications
                 set
                 {
                     SetSettingValue<bool>(BuildTargetGroup.Android, RESCHEDULE_ON_RESTART, value);
-                }
-            }
-
-            /// <summary>
-            /// The full class name of the activity that you wish to be assigned to the notification.
-            /// </summary>
-            public static string CustomActivityString
-            {
-                get
-                {
-                    return GetSettingValue<string>(BuildTargetGroup.Android, CUSTOM_ACTIVITY_CLASS);
-                }
-                set
-                {
-                    SetSettingValue<string>(BuildTargetGroup.Android, CUSTOM_ACTIVITY_CLASS, value);
                 }
             }
 

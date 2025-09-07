@@ -80,11 +80,6 @@ namespace Unity.Notifications
                     "Schedule at exact time",
                     "Whether notifications should appear at exact time or approximate",
                     settingsManager.GetOrAddNotificationSettingValue(NotificationSettings.AndroidSettings.EXACT_ALARM, (AndroidExactSchedulingOption)0)),
-                new NotificationSetting(
-                    NotificationSettings.AndroidSettings.CUSTOM_ACTIVITY_CLASS,
-                    "Custom Activity Name",
-                    "The full class name of the activity which will be assigned to the notification.",
-                    settingsManager.GetOrAddNotificationSettingValue(NotificationSettings.AndroidSettings.CUSTOM_ACTIVITY_CLASS, "com.unity3d.player.UnityPlayerActivity")),
             };
 
             settingsManager.SaveSettings(dirty);
