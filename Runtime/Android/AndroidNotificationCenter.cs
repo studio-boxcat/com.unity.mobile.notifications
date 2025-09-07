@@ -647,8 +647,7 @@ namespace Unity.Notifications.Android
 #if UNITY_EDITOR || !UNITY_ANDROID
             s_CurrentActivity = null;
 #elif UNITY_ANDROID
-            using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-                s_CurrentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            s_CurrentActivity = AndroidApplication.UnityActivity;
 
             var notificationManagerClass = new AndroidJavaClass("com.unity.androidnotifications.UnityNotificationManager");
             var notificationManager = notificationManagerClass.CallStatic<AndroidJavaObject>("getNotificationManagerImpl", s_CurrentActivity, new NotificationCallback());
