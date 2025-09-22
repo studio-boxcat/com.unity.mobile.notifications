@@ -1,17 +1,9 @@
 #if UNITY_ANDROID || UNITY_EDITOR
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Android;
-
-#if UNITY_2022_2_OR_NEWER
 using JniMethodID = System.IntPtr;
 using JniFieldID = System.IntPtr;
-#else
-using JniMethodID = System.String;
-using JniFieldID = System.String;
-#endif
 
 namespace Unity.Notifications.Android
 {
@@ -91,7 +83,6 @@ namespace Unity.Notifications.Android
             scheduleNotification = default;
             createNotificationBuilder = default;
 
-#if UNITY_ANDROID && !UNITY_EDITOR
             KEY_FIRE_TIME = clazz.GetStatic<AndroidJavaObject>("KEY_FIRE_TIME");
             KEY_ID = clazz.GetStatic<AndroidJavaObject>("KEY_ID");
             KEY_INTENT_DATA = clazz.GetStatic<AndroidJavaObject>("KEY_INTENT_DATA");
@@ -108,22 +99,6 @@ namespace Unity.Notifications.Android
             KEY_BIG_SHOW_WHEN_COLLAPSED = clazz.GetStatic<string>("KEY_BIG_SHOW_WHEN_COLLAPSED");
 
             CollectMethods(clazz);
-#else
-            KEY_FIRE_TIME = null;
-            KEY_ID = null;
-            KEY_INTENT_DATA = null;
-            KEY_LARGE_ICON = null;
-            KEY_REPEAT_INTERVAL = null;
-            KEY_NOTIFICATION = null;
-            KEY_SMALL_ICON = null;
-            KEY_SHOW_IN_FOREGROUND = null;
-            KEY_BIG_PICTURE = null;
-            KEY_BIG_LARGE_ICON = null;
-            KEY_BIG_CONTENT_TITLE = null;
-            KEY_BIG_SUMMARY_TEXT = null;
-            KEY_BIG_CONTENT_DESCRIPTION = null;
-            KEY_BIG_SHOW_WHEN_COLLAPSED = null;
-#endif
         }
 
         void CollectMethods(AndroidJavaClass clazz)
@@ -161,13 +136,8 @@ namespace Unity.Notifications.Android
             {
                 if (color == null)
                     return null;
-#if UNITY_2022_2_OR_NEWER
-                int val;
-                AndroidJNIHelper.Unbox(color.GetRawObject(), out val);
+                AndroidJNIHelper.Unbox(color.GetRawObject(), out int val);
                 return val.ToColor();
-#else
-                return color.Call<int>("intValue").ToColor();
-#endif
             }
         }
 
@@ -644,9 +614,6 @@ namespace Unity.Notifications.Android
                 receivedNotificationDispatcher.AddComponent<AndroidReceivedNotificationMainThreadDispatcher>();
             }
 
-#if UNITY_EDITOR || !UNITY_ANDROID
-            s_CurrentActivity = null;
-#elif UNITY_ANDROID
             s_CurrentActivity = AndroidApplication.UnityActivity;
 
             var notificationManagerClass = new AndroidJavaClass("com.unity.androidnotifications.UnityNotificationManager");
@@ -658,7 +625,6 @@ namespace Unity.Notifications.Android
             s_TargetApiLevel = notificationManager.Call<int>("getTargetSdk");
 
             s_Initialized = true;
-#endif
             return s_Initialized;
         }
 
