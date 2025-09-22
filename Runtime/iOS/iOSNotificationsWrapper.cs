@@ -157,47 +157,35 @@ namespace Unity.Notifications.iOS
 
         public static void RegisterAuthorizationRequestCallback()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _SetAuthorizationRequestReceivedDelegate(AuthorizationRequestReceived);
-#endif
         }
 
         public static void RegisterOnReceivedRemoteNotificationCallback()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _SetRemoteNotificationReceivedDelegate(RemoteNotificationReceived);
-#endif
         }
 
         public static void RegisterOnReceivedCallback()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _SetNotificationReceivedDelegate(NotificationReceived);
-#endif
         }
 
         [MonoPInvokeCallback(typeof(AuthorizationRequestCallback))]
         public static void AuthorizationRequestReceived(IntPtr request, iOSAuthorizationRequestData data)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             AuthorizationRequest.OnAuthorizationRequestCompleted(request, data);
-#endif
         }
 
         [MonoPInvokeCallback(typeof(NotificationReceivedCallback))]
         public static void RemoteNotificationReceived(iOSNotificationData data)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             iOSNotificationCenter.OnReceivedRemoteNotification(NotificationDataToDataWithUserInfo(data));
-#endif
         }
 
         [MonoPInvokeCallback(typeof(NotificationReceivedCallback))]
         public static void NotificationReceived(iOSNotificationData data)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             iOSNotificationCenter.OnSentNotification(NotificationDataToDataWithUserInfo(data));
-#endif
         }
 
         static iOSNotificationWithUserInfo NotificationDataToDataWithUserInfo(iOSNotificationData data)
@@ -236,86 +224,55 @@ namespace Unity.Notifications.iOS
 
         public static void RequestAuthorization(IntPtr request, int options, bool registerRemote)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _RequestAuthorization(request, options, registerRemote);
-#endif
         }
 
         public static bool RegisteredForRemoteNotifications()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _RegisteredForRemoteNotifications() != 0;
-#else
-            return false;
-#endif
         }
 
         public static void UnregisterForRemoteNotifications()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _UnregisterForRemoteNotifications();
-#endif
         }
 
         public static iOSNotificationSettings GetNotificationSettings()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _GetNotificationSettings();
-#else
-            return new iOSNotificationSettings();
-#endif
         }
 
         public static void ScheduleLocalNotification(iOSNotificationWithUserInfo data)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             data.data.userInfo = iOSNotificationsWrapper.CsDictionaryToObjC(data.userInfo);
             data.data.attachments = iOSNotificationsWrapper.CsAttachmentsToObjc(data.attachments);
             _ScheduleLocalNotification(data.data);
-#endif
         }
 
         public static iOSNotificationWithUserInfo[] GetDeliveredNotificationData()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             int count;
             var ptr = _GetDeliveredNotificationDataArray(out count);
             return MarshalAndFreeNotificationDataArray(ptr, count);
-#else
-            return null;
-#endif
         }
 
         public static string GetLastRespondedNotificationAction()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _GetLastRespondedNotificationAction();
-#else
-            return null;
-#endif
         }
 
         public static string GetLastRespondedNotificationUserText()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _GetLastRespondedNotificationUserText();
-#else
-            return null;
-#endif
         }
 
         public static iOSNotificationWithUserInfo[] GetScheduledNotificationData()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             int count;
             var ptr = _GetScheduledNotificationDataArray(out count);
             return MarshalAndFreeNotificationDataArray(ptr, count);
-#else
-            return null;
-#endif
         }
 
-#if UNITY_IOS && !UNITY_EDITOR
         static iOSNotificationWithUserInfo[] MarshalAndFreeNotificationDataArray(IntPtr ptr, int count)
         {
             if (count == 0 || ptr == IntPtr.Zero)
@@ -336,11 +293,8 @@ namespace Unity.Notifications.iOS
             return dataArray;
         }
 
-#endif
-
         public static IntPtr CsDictionaryToObjC(Dictionary<string, string> userInfo)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             if (userInfo == null)
                 return IntPtr.Zero;
 
@@ -348,14 +302,10 @@ namespace Unity.Notifications.iOS
             foreach (var item in userInfo)
                 dict = _AddItemToNSDictionary(dict, item.Key, item.Value);
             return dict;
-#else
-            return IntPtr.Zero;
-#endif
         }
 
         public static IntPtr CsAttachmentsToObjc(List<iOSNotificationAttachment> attachments)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             if (attachments == null || attachments.Count == 0)
                 return IntPtr.Zero;
 
@@ -374,27 +324,19 @@ namespace Unity.Notifications.iOS
             }
 
             return atts;
-#else
-            return IntPtr.Zero;
-#endif
         }
 
         public static Dictionary<string, string> NSDictionaryToCs(IntPtr dict)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             var ret = new Dictionary<string, string>();
             var handle = GCHandle.Alloc(ret);
             _ReadNSDictionary(GCHandle.ToIntPtr(handle), dict, ReceiveNSDictionaryKeyValue);
             handle.Free();
             return ret;
-#else
-            return new Dictionary<string, string>();
-#endif
         }
 
         public static List<iOSNotificationAttachment> AttachmentsNSArrayToCs(IntPtr array)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             if (array == IntPtr.Zero)
                 return null;
             var ret = new List<iOSNotificationAttachment>();
@@ -402,39 +344,25 @@ namespace Unity.Notifications.iOS
             _ReadAttachmentsNSArray(GCHandle.ToIntPtr(handle), array, ReceiveUNNotificationAttachment);
             handle.Free();
             return ret;
-#else
-            return null;
-#endif
         }
 
         public static void SetApplicationBadge(int badge)
         {
-#if UNITY_IOS && !UNITY_EDITOR
             _SetApplicationBadge(badge);
-#endif
         }
 
         public static int GetApplicationBadge()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _GetApplicationBadge();
-#else
-            return 0;
-#endif
         }
 
         public static bool GetAppOpenedUsingNotification()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             return _GetAppOpenedUsingNotification();
-#else
-            return false;
-#endif
         }
 
         public static iOSNotificationWithUserInfo? GetLastNotificationData()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             if (_GetAppOpenedUsingNotification())
             {
                 IntPtr ptr = _GetLastNotificationData();
@@ -451,7 +379,6 @@ namespace Unity.Notifications.iOS
                     return data;
                 }
             }
-#endif
             return null;
         }
 
@@ -469,7 +396,6 @@ namespace Unity.Notifications.iOS
                 }
             }
 
-#if UNITY_IOS && !UNITY_EDITOR
             IntPtr categorySet = IntPtr.Zero;
             foreach (var category in categories)
             {
@@ -490,7 +416,6 @@ namespace Unity.Notifications.iOS
 
             foreach (var act in allActions)
                 _ReleaseNSObject(act.Value);
-#endif
         }
     }
 }
