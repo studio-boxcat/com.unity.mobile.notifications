@@ -26,29 +26,6 @@ namespace Unity.Notifications.Android
     }
 
     /// <summary>
-    /// Allows applying an alert behaviour to grouped notifications.
-    /// </summary>
-    public enum GroupAlertBehaviours
-    {
-        /// <summary>
-        /// All notifications in a group with sound or vibration will make sound or vibrate, so this notification will not be muted when it is in a group.
-        /// </summary>
-        GroupAlertAll = 0,
-
-        /// <summary>
-        /// The summary notification in a group will be silenced (no sound or vibration) even if they would otherwise make sound or vibrate.
-        /// Use this to mute this notification if this notification is a group summary.
-        /// </summary>
-        GroupAlertSummary = 1,
-
-        /// <summary>
-        /// All children notification in a group will be silenced (no sound or vibration) even if they would otherwise make sound or vibrate.
-        /// Use this to mute this notification if this notification is a group child. This must be set on all children notifications you want to mute.
-        /// </summary>
-        GroupAlertChildren = 2,
-    }
-
-    /// <summary>
     /// Data for setting up the big picture style notification.
     /// Properties that are not available in devices API level are ignored. See Android documentation for availibility.
     /// <see href="https://developer.android.com/reference/android/app/Notification.BigPictureStyle"/>
@@ -120,16 +97,6 @@ namespace Unity.Notifications.Android
         public DateTime FireTime { get; set; }
 
         /// <summary>
-        /// The notification will be be repeated on every specified time interval.
-        /// Do not set for one time notifications.
-        /// </summary>
-        public TimeSpan? RepeatInterval
-        {
-            get { return m_RepeatInterval; }
-            set { m_RepeatInterval = value.HasValue ? value.Value : (-1L).ToTimeSpan(); }
-        }
-
-        /// <summary>
         /// Notification large icon.
         /// Add a large icon to the notification content view. This image will be shown on the left of the notification view in place of the small icon (which will be placed in a small badge atop the large icon).
         /// The icon has to be registered in Notification Settings or a PNG file has to be placed in the `res/drawable` folder of the Android library plugin
@@ -143,60 +110,6 @@ namespace Unity.Notifications.Android
         /// Currently only BigPicture and BigText styles are supported.
         /// </summary>
         public NotificationStyle Style { get; set; }
-
-        /// <summary>
-        /// Accent color to be applied by the standard style templates when presenting this notification.
-        /// The template design constructs a colorful header image by overlaying the icon image (stenciled in white) atop a field of this color. Alpha components are ignored.
-        /// </summary>
-        public Color? Color
-        {
-            get { return m_Color; }
-            set { m_Color = value.HasValue ? value.Value : new Color(0, 0, 0, 0); }
-        }
-
-        /// <summary>
-        /// Sets the number of items this notification represents.
-        /// Is displayed as a badge count on the notification icon if the launcher supports this behavior.
-        /// </summary>
-        public int Number { get; set; }
-
-        /// <summary>
-        /// This notification will automatically be dismissed when the user touches it.
-        /// By default this behavior is turned off.
-        /// </summary>
-        public bool ShouldAutoCancel { get; set; }
-
-        /// <summary>
-        /// Show the notification time field as a stopwatch instead of a timestamp.
-        /// </summary>
-        public bool UsesStopwatch { get; set; }
-
-        /// <summary>
-        ///Set this property for the notification to be made part of a group of notifications sharing the same key.
-        /// Grouped notifications may display in a cluster or stack on devices which support such rendering.
-        /// Only available on Android 7.0 (API level 24) and above.
-        /// </summary>
-        public string Group { get; set; }
-
-        /// <summary>
-        /// Set this notification to be the group summary for a group of notifications. Requires the 'Group' property to also be set.
-        /// Grouped notifications may display in a cluster or stack on devices which support such rendering.
-        /// Only available on Android 7.0 (API level 24) and above.
-        /// </summary>
-        public bool GroupSummary { get; set; }
-
-        /// <summary>
-        /// Sets the group alert behavior for this notification. Set this property to mute this notification if alerts for this notification's group should be handled by a different notification.
-        /// This is only applicable for notifications that belong to a group. This must be set on all notifications you want to mute.
-        /// Only available on Android 8.0 (API level 26) and above.
-        /// </summary>
-        public GroupAlertBehaviours GroupAlertBehaviour { get; set; }
-
-        /// <summary>
-        /// The sort key will be used to order this notification among other notifications from the same package.
-        /// Notifications will be sorted lexicographically using this value.
-        /// </summary>
-        public string SortKey { get; set; }
 
         /// <summary>
         /// Use this to save arbitrary string data related to the notification.
@@ -249,8 +162,6 @@ namespace Unity.Notifications.Android
 
         internal bool ShowCustomTimestamp { get; set; }
 
-        private Color m_Color;
-        private TimeSpan m_RepeatInterval;
         private DateTime m_CustomTimestamp;
         private bool m_SilentInForeground;
         private BigPictureStyle? m_BigPictureStyle;
@@ -268,40 +179,15 @@ namespace Unity.Notifications.Android
             FireTime = fireTime;
 
             SmallIcon = string.Empty;
-            ShouldAutoCancel = false;
             LargeIcon = string.Empty;
             Style = NotificationStyle.None;
-            Number = -1;
-            UsesStopwatch = false;
             IntentData = string.Empty;
-            Group = string.Empty;
-            GroupSummary = false;
-            SortKey = string.Empty;
-            GroupAlertBehaviour = GroupAlertBehaviours.GroupAlertAll;
             ShowTimestamp = false;
             ShowCustomTimestamp = false;
             m_BigPictureStyle = null;
 
-            m_RepeatInterval = (-1L).ToTimeSpan();
-            m_Color = new Color(0, 0, 0, 0);
             m_CustomTimestamp = (-1L).ToDatetime();
             m_SilentInForeground = false;
-        }
-
-        /// <summary>
-        /// Create a repeatable notification struct with all optional fields set to default values.
-        /// </summary>
-        /// <param name="title">Notification title</param>
-        /// <param name="text">Text to show on notification</param>
-        /// <param name="fireTime">Date and time when to show, can be DateTime.Now to show right away</param>
-        /// <param name="repeatInterval">Makes notification repeatable with this time interval</param>
-        /// <remarks>
-        /// There is a minimum period of 1 minute for repeating notifications.
-        /// </remarks>
-        public AndroidNotification(string title, string text, DateTime fireTime, TimeSpan repeatInterval)
-            : this(title, text, fireTime)
-        {
-            RepeatInterval = repeatInterval;
         }
 
         /// <summary>
@@ -310,10 +196,9 @@ namespace Unity.Notifications.Android
         /// <param name="title">Notification title</param>
         /// <param name="text">Text to show on notification</param>
         /// <param name="fireTime">Date and time when to show, can be DateTime.Now to show right away</param>
-        /// <param name="repeatInterval">Makes notification repeatable with this time interval</param>
         /// <param name="smallIcon">Name of the small icon to be shown on notification</param>
-        public AndroidNotification(string title, string text, DateTime fireTime, TimeSpan repeatInterval, string smallIcon)
-            : this(title, text, fireTime, repeatInterval)
+        public AndroidNotification(string title, string text, DateTime fireTime, string smallIcon)
+            : this(title, text, fireTime)
         {
             SmallIcon = smallIcon;
         }

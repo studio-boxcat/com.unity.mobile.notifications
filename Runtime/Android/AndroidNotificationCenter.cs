@@ -42,26 +42,11 @@ namespace Unity.Notifications.Android
         public AndroidJavaObject KEY_ID;
         public AndroidJavaObject KEY_INTENT_DATA;
         public AndroidJavaObject KEY_LARGE_ICON;
-        public AndroidJavaObject KEY_REPEAT_INTERVAL;
-        public AndroidJavaObject KEY_NOTIFICATION;
         public AndroidJavaObject KEY_SMALL_ICON;
         public AndroidJavaObject KEY_SHOW_IN_FOREGROUND;
-        public AndroidJavaObject KEY_BIG_PICTURE;
-
-        // these are lesser used, don't waste java global refs on them
-        public string KEY_BIG_LARGE_ICON;
-        public string KEY_BIG_CONTENT_TITLE;
-        public string KEY_BIG_SUMMARY_TEXT;
-        public string KEY_BIG_CONTENT_DESCRIPTION;
-        public string KEY_BIG_SHOW_WHEN_COLLAPSED;
 
         private JniMethodID getNotificationFromIntent;
         private JniMethodID setNotificationIcon;
-        private JniMethodID setNotificationColor;
-        private JniMethodID getNotificationColor;
-        private JniMethodID setNotificationUsesChronometer;
-        private JniMethodID setNotificationGroupAlertBehavior;
-        private JniMethodID getNotificationGroupAlertBehavior;
         private JniMethodID getNotificationChannelId;
         private JniMethodID scheduleNotification;
         private JniMethodID createNotificationBuilder;
@@ -74,11 +59,6 @@ namespace Unity.Notifications.Android
 
             getNotificationFromIntent = default;
             setNotificationIcon = default;
-            setNotificationColor = default;
-            getNotificationColor = default;
-            setNotificationUsesChronometer = default;
-            setNotificationGroupAlertBehavior = default;
-            getNotificationGroupAlertBehavior = default;
             getNotificationChannelId = default;
             scheduleNotification = default;
             createNotificationBuilder = default;
@@ -87,16 +67,8 @@ namespace Unity.Notifications.Android
             KEY_ID = clazz.GetStatic<AndroidJavaObject>("KEY_ID");
             KEY_INTENT_DATA = clazz.GetStatic<AndroidJavaObject>("KEY_INTENT_DATA");
             KEY_LARGE_ICON = clazz.GetStatic<AndroidJavaObject>("KEY_LARGE_ICON");
-            KEY_REPEAT_INTERVAL = clazz.GetStatic<AndroidJavaObject>("KEY_REPEAT_INTERVAL");
-            KEY_NOTIFICATION = clazz.GetStatic<AndroidJavaObject>("KEY_NOTIFICATION");
             KEY_SMALL_ICON = clazz.GetStatic<AndroidJavaObject>("KEY_SMALL_ICON");
             KEY_SHOW_IN_FOREGROUND = clazz.GetStatic<AndroidJavaObject>("KEY_SHOW_IN_FOREGROUND");
-            KEY_BIG_PICTURE = clazz.GetStatic<AndroidJavaObject>("KEY_BIG_PICTURE");
-            KEY_BIG_LARGE_ICON = clazz.GetStatic<string>("KEY_BIG_LARGE_ICON");
-            KEY_BIG_CONTENT_TITLE = clazz.GetStatic<string>("KEY_BIG_CONTENT_TITLE");
-            KEY_BIG_SUMMARY_TEXT = clazz.GetStatic<string>("KEY_BIG_SUMMARY_TEXT");
-            KEY_BIG_CONTENT_DESCRIPTION = clazz.GetStatic<string>("KEY_BIG_CONTENT_DESCRIPTION");
-            KEY_BIG_SHOW_WHEN_COLLAPSED = clazz.GetStatic<string>("KEY_BIG_SHOW_WHEN_COLLAPSED");
 
             CollectMethods(clazz);
         }
@@ -105,11 +77,6 @@ namespace Unity.Notifications.Android
         {
             getNotificationFromIntent = JniApi.FindMethod(clazz, "getNotificationFromIntent", "(Landroid/content/Intent;)Landroid/app/Notification;", false);
             setNotificationIcon = JniApi.FindMethod(clazz, "setNotificationIcon", "(Landroid/app/Notification$Builder;Ljava/lang/String;Ljava/lang/String;)V", true);
-            setNotificationColor = JniApi.FindMethod(clazz, "setNotificationColor", "(Landroid/app/Notification$Builder;I)V", true);
-            getNotificationColor = JniApi.FindMethod(clazz, "getNotificationColor", "(Landroid/app/Notification;)Ljava/lang/Integer;", true);
-            setNotificationUsesChronometer = JniApi.FindMethod(clazz, "setNotificationUsesChronometer", "(Landroid/app/Notification$Builder;Z)V", true);
-            setNotificationGroupAlertBehavior = JniApi.FindMethod(clazz, "setNotificationGroupAlertBehavior", "(Landroid/app/Notification$Builder;I)V", true);
-            getNotificationGroupAlertBehavior = JniApi.FindMethod(clazz, "getNotificationGroupAlertBehavior", "(Landroid/app/Notification;)I", true);
             getNotificationChannelId = JniApi.FindMethod(clazz, "getNotificationChannelId", "(Landroid/app/Notification;)Ljava/lang/String;", true);
             scheduleNotification = JniApi.FindMethod(clazz, "scheduleNotification", "(Landroid/app/Notification$Builder;Z)I", false);
             createNotificationBuilder = JniApi.FindMethod(clazz, "createNotificationBuilder", "(Ljava/lang/String;)Landroid/app/Notification$Builder;", false);
@@ -125,37 +92,6 @@ namespace Unity.Notifications.Android
             klass.CallStatic(setNotificationIcon, builder, keyName, icon);
         }
 
-        public void SetNotificationColor(AndroidJavaObject builder, int color)
-        {
-            klass.CallStatic(setNotificationColor, builder, color);
-        }
-
-        public Color? GetNotificationColor(AndroidJavaObject notification)
-        {
-            using (var color = klass.CallStatic<AndroidJavaObject>(getNotificationColor, notification))
-            {
-                if (color == null)
-                    return null;
-                AndroidJNIHelper.Unbox(color.GetRawObject(), out int val);
-                return val.ToColor();
-            }
-        }
-
-        public void SetNotificationUsesChronometer(AndroidJavaObject builder, bool usesStopwatch)
-        {
-            klass.CallStatic(setNotificationUsesChronometer, builder, usesStopwatch);
-        }
-
-        public void SetNotificationGroupAlertBehavior(AndroidJavaObject builder, int groupAlertBehaviour)
-        {
-            klass.CallStatic(setNotificationGroupAlertBehavior, builder, groupAlertBehaviour);
-        }
-
-        public int GetNotificationGroupAlertBehavior(AndroidJavaObject notification)
-        {
-            return klass.CallStatic<int>(getNotificationGroupAlertBehavior, notification);
-        }
-
         public string GetNotificationChannelId(AndroidJavaObject notification)
         {
             return klass.CallStatic<string>(getNotificationChannelId, notification);
@@ -166,20 +102,22 @@ namespace Unity.Notifications.Android
             self.Call("registerNotificationChannelGroup", group.Id, group.Name, group.Description);
         }
 
-        public void RegisterNotificationChannel(AndroidNotificationChannel channel)
+        public void RegisterNotificationChannel(string id, string name, string desc)
         {
             self.Call("registerNotificationChannel",
-                channel.Id,
-                channel.Name,
-                (int)channel.Importance,
-                channel.Description,
-                channel.EnableLights,
-                channel.EnableVibration,
-                channel.CanBypassDnd,
-                channel.CanShowBadge,
-                channel.VibrationPattern,
-                (int)channel.LockScreenVisibility,
-                channel.Group
+                id,
+                name,
+                (int)Importance.High, // High importance, notification is shown everywhere, makes noise and is shown on the screen.
+                desc,
+                false, // EnableLights
+                false, // EnableVibration
+                // Whether or not notifications posted to this channel can bypass the Do Not Disturb.
+                // This can be changed by users in the settings app.
+                false, // CanBypassDnd
+                true, // CanShowBadge
+                null, // VibrationPattern
+                (int)LockScreenVisibility.Public,
+                null // Group
             );
         }
 
@@ -256,11 +194,6 @@ namespace Unity.Notifications.Android
             );
         }
 
-        public bool CanScheduleExactAlarms()
-        {
-            return self.Call<bool>("canScheduleExactAlarms");
-        }
-
         public PermissionStatus AreNotificationsEnabled()
         {
             return (PermissionStatus)self.Call<int>("areNotificationsEnabled");
@@ -269,85 +202,24 @@ namespace Unity.Notifications.Android
 
     struct NotificationJni
     {
-        public AndroidJavaObject EXTRA_TITLE;
-        public AndroidJavaObject EXTRA_TEXT;
-        public AndroidJavaObject EXTRA_SHOW_CHRONOMETER;
-        public AndroidJavaObject EXTRA_BIG_TEXT;
-        public AndroidJavaObject EXTRA_SHOW_WHEN;
-        public int FLAG_AUTO_CANCEL;
-        public int FLAG_GROUP_SUMMARY;
-
-        JniMethodID getGroup;
-        JniMethodID getSortKey;
-
         JniFieldID extras;
-        JniFieldID flags;
-        JniFieldID number;
-        JniFieldID when;
 
         public void CollectJni()
         {
             using (var notificationClass = new AndroidJavaClass("android.app.Notification"))
             {
-                CollectConstants(notificationClass);
-                CollectMethods(notificationClass);
                 CollectFields(notificationClass);
             }
-        }
-
-        void CollectConstants(AndroidJavaClass clazz)
-        {
-            EXTRA_TITLE = clazz.GetStatic<AndroidJavaObject>("EXTRA_TITLE");
-            EXTRA_TEXT = clazz.GetStatic<AndroidJavaObject>("EXTRA_TEXT");
-            EXTRA_SHOW_CHRONOMETER = clazz.GetStatic<AndroidJavaObject>("EXTRA_SHOW_CHRONOMETER");
-            EXTRA_BIG_TEXT = clazz.GetStatic<AndroidJavaObject>("EXTRA_BIG_TEXT");
-            EXTRA_SHOW_WHEN = clazz.GetStatic<AndroidJavaObject>("EXTRA_SHOW_WHEN");
-            FLAG_AUTO_CANCEL = clazz.GetStatic<int>("FLAG_AUTO_CANCEL");
-            FLAG_GROUP_SUMMARY = clazz.GetStatic<int>("FLAG_GROUP_SUMMARY");
-        }
-
-        void CollectMethods(AndroidJavaClass clazz)
-        {
-            getGroup = JniApi.FindMethod(clazz, "getGroup", "()Ljava/lang/String;", false);
-            getSortKey = JniApi.FindMethod(clazz, "getSortKey", "()Ljava/lang/String;", false);
         }
 
         void CollectFields(AndroidJavaClass clazz)
         {
             extras = JniApi.FindField(clazz, "extras", "Landroid/os/Bundle;", false);
-            flags = JniApi.FindField(clazz, "flags", "I", false);
-            number = JniApi.FindField(clazz, "number", "I", false);
-            when = JniApi.FindField(clazz, "when", "J", false);
         }
 
         public AndroidJavaObject Extras(AndroidJavaObject notification)
         {
             return notification.Get<AndroidJavaObject>(extras);
-        }
-
-        public int Flags(AndroidJavaObject notification)
-        {
-            return notification.Get<int>(flags);
-        }
-
-        public int Number(AndroidJavaObject notification)
-        {
-            return notification.Get<int>(number);
-        }
-
-        public string GetGroup(AndroidJavaObject notification)
-        {
-            return notification.Call<string>(getGroup);
-        }
-
-        public string GetSortKey(AndroidJavaObject notification)
-        {
-            return notification.Call<string>(getSortKey);
-        }
-
-        internal long When(AndroidJavaObject notification)
-        {
-            return notification.Get<long>(when);
         }
     }
 
@@ -356,13 +228,8 @@ namespace Unity.Notifications.Android
         JniMethodID getExtras;
         JniMethodID setContentTitle;
         JniMethodID setContentText;
-        JniMethodID setAutoCancel;
-        JniMethodID setNumber;
         JniMethodID setStyle;
         JniMethodID setWhen;
-        JniMethodID setGroup;
-        JniMethodID setGroupSummary;
-        JniMethodID setSortKey;
         JniMethodID setShowWhen;
 
         public void CollectJni()
@@ -372,13 +239,8 @@ namespace Unity.Notifications.Android
                 getExtras = JniApi.FindMethod(clazz, "getExtras", "()Landroid/os/Bundle;", false);
                 setContentTitle = JniApi.FindMethod(clazz, "setContentTitle", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;", false);
                 setContentText = JniApi.FindMethod(clazz, "setContentText", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;", false);
-                setAutoCancel = JniApi.FindMethod(clazz, "setAutoCancel", "(Z)Landroid/app/Notification$Builder;", false);
-                setNumber = JniApi.FindMethod(clazz, "setNumber", "(I)Landroid/app/Notification$Builder;", false);
                 setStyle = JniApi.FindMethod(clazz, "setStyle", "(Landroid/app/Notification$Style;)Landroid/app/Notification$Builder;", false);
                 setWhen = JniApi.FindMethod(clazz, "setWhen", "(J)Landroid/app/Notification$Builder;", false);
-                setGroup = JniApi.FindMethod(clazz, "setGroup", "(Ljava/lang/String;)Landroid/app/Notification$Builder;", false);
-                setGroupSummary = JniApi.FindMethod(clazz, "setGroupSummary", "(Z)Landroid/app/Notification$Builder;", false);
-                setSortKey = JniApi.FindMethod(clazz, "setSortKey", "(Ljava/lang/String;)Landroid/app/Notification$Builder;", false);
                 setShowWhen = JniApi.FindMethod(clazz, "setShowWhen", "(Z)Landroid/app/Notification$Builder;", false);
             }
         }
@@ -398,16 +260,6 @@ namespace Unity.Notifications.Android
             builder.Call<AndroidJavaObject>(setContentText, text).Dispose();
         }
 
-        public void SetAutoCancel(AndroidJavaObject builder, bool shouldAutoCancel)
-        {
-            builder.Call<AndroidJavaObject>(setAutoCancel, shouldAutoCancel).Dispose();
-        }
-
-        public void SetNumber(AndroidJavaObject builder, int number)
-        {
-            builder.Call<AndroidJavaObject>(setNumber, number).Dispose();
-        }
-
         public void SetStyle(AndroidJavaObject builder, AndroidJavaObject style)
         {
             builder.Call<AndroidJavaObject>(setStyle, style).Dispose();
@@ -416,21 +268,6 @@ namespace Unity.Notifications.Android
         public void SetWhen(AndroidJavaObject builder, long timestamp)
         {
             builder.Call<AndroidJavaObject>(setWhen, timestamp).Dispose();
-        }
-
-        public void SetGroup(AndroidJavaObject builder, string group)
-        {
-            builder.Call<AndroidJavaObject>(setGroup, group).Dispose();
-        }
-
-        public void SetGroupSummary(AndroidJavaObject builder, bool groupSummary)
-        {
-            builder.Call<AndroidJavaObject>(setGroupSummary, groupSummary).Dispose();
-        }
-
-        public void SetSortKey(AndroidJavaObject builder, string sortKey)
-        {
-            builder.Call<AndroidJavaObject>(setSortKey, sortKey).Dispose();
         }
 
         public void SetShowWhen(AndroidJavaObject builder, bool showTimestamp)
@@ -543,26 +380,18 @@ namespace Unity.Notifications.Android
 
         public static JniFieldID FindField(AndroidJavaClass clazz, string name, string signature, bool isStatic)
         {
-#if UNITY_2022_2_OR_NEWER
             var field = AndroidJNIHelper.GetFieldID(clazz.GetRawClass(), name, signature, isStatic);
             if (field == IntPtr.Zero)
                 throw new Exception($"Field {name} with signature {signature} not found");
             return field;
-#else
-            return name;
-#endif
         }
 
         public static JniMethodID FindMethod(AndroidJavaClass clazz, string name, string signature, bool isStatic)
         {
-#if UNITY_2022_2_OR_NEWER
             var method = AndroidJNIHelper.GetMethodID(clazz.GetRawClass(), name, signature, isStatic);
             if (method == IntPtr.Zero)
                 throw new Exception($"Method {name} with signature {signature} not found");
             return method;
-#else
-            return name;
-#endif
         }
     }
 
@@ -595,7 +424,6 @@ namespace Unity.Notifications.Android
         private static AndroidJavaObject s_CurrentActivity;
         private static JniApi s_Jni;
         private static int s_DeviceApiLevel;
-        private static int s_TargetApiLevel;
         private static bool s_Initialized = false;
 
         /// <summary>
@@ -622,7 +450,6 @@ namespace Unity.Notifications.Android
 
             using (var version = new AndroidJavaClass("android/os/Build$VERSION"))
                 s_DeviceApiLevel = version.GetStatic<int>("SDK_INT");
-            s_TargetApiLevel = notificationManager.Call<int>("getTargetSdk");
 
             s_Initialized = true;
             return s_Initialized;
@@ -682,7 +509,8 @@ namespace Unity.Notifications.Android
                 if (!Initialize())
                     return false;
                 // on lower target SDK OS asks permission automatically, can't ask manually
-                return s_TargetApiLevel >= API_POST_NOTIFICATIONS_PERMISSION_REQUIRED;
+                // return s_TargetApiLevel >= API_POST_NOTIFICATIONS_PERMISSION_REQUIRED;
+                return true;
             }
         }
 
@@ -708,81 +536,6 @@ namespace Unity.Notifications.Android
 
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Whether notifications are scheduled at exact times.
-        /// Combines notification settings and actual device settings (since Android 12 exact scheduling is user controllable).
-        /// </summary>
-        /// <seealso cref="AndroidExactSchedulingOption"/>
-        public static bool UsingExactScheduling
-        {
-            get
-            {
-                if (!Initialize())
-                    return false;
-                return s_Jni.NotificationManager.CanScheduleExactAlarms();
-            }
-        }
-
-        /// <summary>
-        /// Request user permission to schedule alarms at exact times.
-        /// Only works on Android 12 and later, older versions can schedule at exact times without requesting it.
-        /// This may cause your app to use more battery.
-        /// App must have SCHEDULE_EXACT_ALARM permission to be able to request this.
-        /// </summary>
-        /// <seealso cref="AndroidExactSchedulingOption"/>
-        public static void RequestExactScheduling()
-        {
-            if (!Initialize())
-                return;
-            if (s_DeviceApiLevel < 31)
-                return;
-
-            StartActionForThisPackage("android.settings.REQUEST_SCHEDULE_EXACT_ALARM");
-        }
-
-        private static void StartActionForThisPackage(string action)
-        {
-            var packageName = s_CurrentActivity.Call<string>("getPackageName");
-            using (var uriClass = new AndroidJavaClass("android.net.Uri"))
-            using (var uri = uriClass.CallStatic<AndroidJavaObject>("parse", $"package:{packageName}"))
-            using (var intent = new AndroidJavaObject("android.content.Intent", action, uri))
-                s_CurrentActivity.Call("startActivity", intent);
-        }
-
-        /// <summary>
-        /// Whether app is ignoring device battery optimization settings.
-        /// When device is in power saving or similar restricted mode, scheduled notifications may not appear or be late.
-        /// </summary>
-        /// <seealso cref="RequestIgnoreBatteryOptimizations()"/>
-        public static bool IgnoringBatteryOptimizations
-        {
-            get
-            {
-                if (!Initialize())
-                    return false;
-                if (s_DeviceApiLevel < 23)
-                    return false;
-                using (var pm = s_CurrentActivity.Call<AndroidJavaObject>("getSystemService", "power"))
-                    return pm.Call<bool>("isIgnoringBatteryOptimizations", s_CurrentActivity.Call<string>("getPackageName"));
-            }
-        }
-
-        /// <summary>
-        /// Request user to allow unrestricted background work for app.
-        /// UI for it is provided by OS and is manufacturer specific. Recommended to explain user what to do before requesting.
-        /// App must have REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission to be able to request this.
-        /// </summary>
-        /// <seealso cref="AndroidExactSchedulingOption"/>
-        public static void RequestIgnoreBatteryOptimizations()
-        {
-            if (!Initialize())
-                return;
-            if (s_DeviceApiLevel < 23)
-                return;
-
-            StartActionForThisPackage("android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS");
         }
 
         /// <summary>
@@ -822,70 +575,32 @@ namespace Unity.Notifications.Android
         ///  When a channel is deleted and recreated, all of the previous settings are restored. In order to change any settings
         ///  besides the name or description an entirely new channel (with a different channel ID) must be created.
         /// </remarks>
-        public static void RegisterNotificationChannel(AndroidNotificationChannel channel)
+        public static void RegisterNotificationChannel(string id, string name, string desc)
         {
             if (!Initialize())
                 return;
 
-            if (string.IsNullOrEmpty(channel.Id))
-            {
-                throw new Exception("Cannot register notification channel, the channel ID is not specified.");
-            }
-            if (string.IsNullOrEmpty(channel.Name))
-            {
-                throw new Exception(string.Format("Cannot register notification channel: {0} , the channel Name is not set.", channel.Id));
-            }
-            if (string.IsNullOrEmpty(channel.Description))
-            {
-                throw new Exception(string.Format("Cannot register notification channel: {0} , the channel Description is not set.", channel.Id));
-            }
-
-            s_Jni.NotificationManager.RegisterNotificationChannel(channel);
+            s_Jni.NotificationManager.RegisterNotificationChannel(id, name, desc);
         }
 
-        /// <summary>
-        /// Returns the notification channel with the specified id.
-        /// The notification channel struct fields might not be identical to the channel struct used to initially register the channel if they were changed by the user.
-        /// </summary>
-        /// <param name="channelId">ID of the channel to retrieve</param>
-        /// <returns>Channel with given ID or empty struct if such channel does not exist</returns>
-        public static AndroidNotificationChannel GetNotificationChannel(string channelId)
-        {
-            return GetNotificationChannels().SingleOrDefault(channel => channel.Id == channelId);
-        }
-
-        /// <summary>
-        /// Returns all notification channels that were created by the app.
-        /// </summary>
-        /// <returns>All existing channels</returns>
-        public static AndroidNotificationChannel[] GetNotificationChannels()
+        public static bool HasNotificationChannel(string channelId)
         {
             if (!Initialize())
-                return new AndroidNotificationChannel[0];
-
-            var androidChannels = s_Jni.NotificationManager.GetNotificationChannels();
-            var channels = new AndroidNotificationChannel[androidChannels == null ? 0 : androidChannels.Length];
-
-            for (int i = 0; i < channels.Length; ++i)
             {
-                var channel = androidChannels[i];
-                var ch = new AndroidNotificationChannel();
-                ch.Id = channel.Get<string>("id");
-                ch.Name = channel.Get<string>("name");
-                ch.Importance = channel.Get<int>("importance").ToImportance();
-                ch.Description = channel.Get<string>("description");
-                ch.EnableLights = channel.Get<bool>("enableLights");
-                ch.EnableVibration = channel.Get<bool>("enableVibration");
-                ch.CanBypassDnd = channel.Get<bool>("canBypassDnd");
-                ch.CanShowBadge = channel.Get<bool>("canShowBadge");
-                ch.VibrationPattern = channel.Get<long[]>("vibrationPattern");
-                ch.LockScreenVisibility = channel.Get<int>("lockscreenVisibility").ToLockScreenVisibility();
-                ch.Group = channel.Get<string>("group");
-
-                channels[i] = ch;
+                L.I("[AndroidNotificationCenter] Not initialized.");
+                return false;
             }
 
-            return channels;
+            var androidChannels = s_Jni.NotificationManager.GetNotificationChannels();
+
+            for (int i = 0; i < androidChannels.Length; ++i)
+            {
+                var channel = androidChannels[i];
+                if (channel.Get<string>("id") == channelId)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1149,10 +864,6 @@ namespace Unity.Notifications.Android
                 s_Jni.NotificationBuilder.SetContentTitle(notificationBuilder, notification.Title);
             if (!string.IsNullOrEmpty(notification.Text))
                 s_Jni.NotificationBuilder.SetContentText(notificationBuilder, notification.Text);
-            if (notification.ShouldAutoCancel)
-                s_Jni.NotificationBuilder.SetAutoCancel(notificationBuilder, notification.ShouldAutoCancel);
-            if (notification.Number >= 0)
-                s_Jni.NotificationBuilder.SetNumber(notificationBuilder, notification.Number);
             switch (notification.Style)
             {
                 case NotificationStyle.None:
@@ -1174,24 +885,10 @@ namespace Unity.Notifications.Android
             }
             long timestampValue = notification.ShowCustomTimestamp ? notification.CustomTimestamp.ToLong() : fireTime;
             s_Jni.NotificationBuilder.SetWhen(notificationBuilder, timestampValue);
-            if (!string.IsNullOrEmpty(notification.Group))
-                s_Jni.NotificationBuilder.SetGroup(notificationBuilder, notification.Group);
-            if (notification.GroupSummary)
-                s_Jni.NotificationBuilder.SetGroupSummary(notificationBuilder, notification.GroupSummary);
-            if (!string.IsNullOrEmpty(notification.SortKey))
-                s_Jni.NotificationBuilder.SetSortKey(notificationBuilder, notification.SortKey);
             if (notification.ShowTimestamp)
                 s_Jni.NotificationBuilder.SetShowWhen(notificationBuilder, notification.ShowTimestamp);
-            int color = notification.Color.ToInt();
-            if (color != 0)
-                s_Jni.NotificationManager.SetNotificationColor(notificationBuilder, color);
-            if (notification.UsesStopwatch)
-                s_Jni.NotificationManager.SetNotificationUsesChronometer(notificationBuilder, notification.UsesStopwatch);
-            if (notification.GroupAlertBehaviour != GroupAlertBehaviours.GroupAlertAll)  // All is default value
-                s_Jni.NotificationManager.SetNotificationGroupAlertBehavior(notificationBuilder, (int)notification.GroupAlertBehaviour);
 
             extras = s_Jni.NotificationBuilder.GetExtras(notificationBuilder);
-            s_Jni.Bundle.PutLong(extras, s_Jni.NotificationManager.KEY_REPEAT_INTERVAL, notification.RepeatInterval.ToLong());
             s_Jni.Bundle.PutLong(extras, s_Jni.NotificationManager.KEY_FIRE_TIME, fireTime);
             s_Jni.Bundle.PutBoolean(extras, s_Jni.NotificationManager.KEY_SHOW_IN_FOREGROUND, notification.ShowInForeground);
             if (!string.IsNullOrEmpty(notification.IntentData))
@@ -1207,51 +904,8 @@ namespace Unity.Notifications.Android
                     return null;
 
                 var channelId = s_Jni.NotificationManager.GetNotificationChannelId(notificationObj);
-                int flags = s_Jni.Notification.Flags(notificationObj);
 
-                var notification = new AndroidNotification();
-                notification.Title = s_Jni.Bundle.GetString(extras, s_Jni.Notification.EXTRA_TITLE);
-                notification.Text = s_Jni.Bundle.GetString(extras, s_Jni.Notification.EXTRA_TEXT);
-                notification.SmallIcon = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_SMALL_ICON);
-                notification.LargeIcon = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_LARGE_ICON);
-                notification.ShouldAutoCancel = 0 != (flags & s_Jni.Notification.FLAG_AUTO_CANCEL);
-                notification.UsesStopwatch = s_Jni.Bundle.GetBoolean(extras, s_Jni.Notification.EXTRA_SHOW_CHRONOMETER, false);
-                notification.FireTime = s_Jni.Bundle.GetLong(extras, s_Jni.NotificationManager.KEY_FIRE_TIME, -1L).ToDatetime();
-                notification.RepeatInterval = s_Jni.Bundle.GetLong(extras, s_Jni.NotificationManager.KEY_REPEAT_INTERVAL, -1L).ToTimeSpan();
-                notification.ShowInForeground = s_Jni.Bundle.GetBoolean(extras, s_Jni.NotificationManager.KEY_SHOW_IN_FOREGROUND, true);
-
-                if (s_Jni.Bundle.ContainsKey(extras, s_Jni.Notification.EXTRA_BIG_TEXT))
-                    notification.Style = NotificationStyle.BigTextStyle;
-                else if (s_Jni.Bundle.ContainsKey(extras, s_Jni.NotificationManager.KEY_BIG_PICTURE))
-                    notification.Style = NotificationStyle.BigPictureStyle;
-                else
-                    notification.Style = NotificationStyle.None;
-
-                if (notification.Style == NotificationStyle.BigPictureStyle)
-                {
-                    var bigPicture = new BigPictureStyle();
-                    bigPicture.Picture = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_BIG_PICTURE);
-                    bigPicture.LargeIcon = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_BIG_LARGE_ICON);
-                    bigPicture.ContentTitle = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_BIG_CONTENT_TITLE);
-                    bigPicture.ContentDescription = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_BIG_CONTENT_DESCRIPTION);
-                    bigPicture.SummaryText = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_BIG_SUMMARY_TEXT);
-                    bigPicture.ShowWhenCollapsed = s_Jni.Bundle.GetBoolean(extras, s_Jni.NotificationManager.KEY_BIG_SHOW_WHEN_COLLAPSED, false);
-                    notification.BigPicture = bigPicture;
-                }
-
-                notification.Color = s_Jni.NotificationManager.GetNotificationColor(notificationObj);
-                notification.Number = s_Jni.Notification.Number(notificationObj);
-                notification.IntentData = s_Jni.Bundle.GetString(extras, s_Jni.NotificationManager.KEY_INTENT_DATA);
-                notification.Group = s_Jni.Notification.GetGroup(notificationObj);
-                notification.GroupSummary = 0 != (flags & s_Jni.Notification.FLAG_GROUP_SUMMARY);
-                notification.SortKey = s_Jni.Notification.GetSortKey(notificationObj);
-                notification.GroupAlertBehaviour = s_Jni.NotificationManager.GetNotificationGroupAlertBehavior(notificationObj).ToGroupAlertBehaviours();
-                var showTimestamp = s_Jni.Bundle.GetBoolean(extras, s_Jni.Notification.EXTRA_SHOW_WHEN, false);
-                notification.ShowTimestamp = showTimestamp;
-                if (showTimestamp)
-                    notification.CustomTimestamp = s_Jni.Notification.When(notificationObj).ToDatetime();
-
-                var data = new AndroidNotificationIntentData(id, channelId, notification);
+                var data = new AndroidNotificationIntentData(id, channelId);
                 data.NativeNotification = notificationObj;
                 return data;
             }
