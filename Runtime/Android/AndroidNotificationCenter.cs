@@ -587,11 +587,15 @@ namespace Unity.Notifications.Android
         {
             if (!Initialize())
             {
-                L.I("[AndroidNotificationCenter] Not initialized.");
+                L.E("[AndroidNotificationCenter] Not initialized.");
                 return false;
             }
 
             var androidChannels = s_Jni.NotificationManager.GetNotificationChannels();
+
+            // androidChannels will be null when there's no channel at all.
+            if (androidChannels == null)
+                return false;
 
             for (int i = 0; i < androidChannels.Length; ++i)
             {
