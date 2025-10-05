@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Android;
 using JniMethodID = System.IntPtr;
 using JniFieldID = System.IntPtr;
 
